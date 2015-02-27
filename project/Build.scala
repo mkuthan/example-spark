@@ -21,13 +21,9 @@ object BuildSettings {
 
   import org.scalastyle.sbt.ScalastylePlugin.{Settings => scalastyleSettings}
   import scoverage.ScoverageSbtPlugin.{buildSettings => scoverageSettings}
-  import spray.revolver.RevolverPlugin.{buildSettings => revolverSettings}
-  import net.virtualvoid.sbt.graph.Plugin.{graphSettings => graphSettings}
 
   object Versions {
-    val kafka = "0.8.2.0"
     val spark = "1.2.1"
-    val zookeeper = "3.4.6"
   }
 
   val buildSettings = Defaults.coreDefaultSettings ++
@@ -47,23 +43,17 @@ object BuildSettings {
         "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
       ),
       libraryDependencies ++= Seq(
-        "org.apache.spark" % "spark-core_2.10" % Versions.spark notTransitive,
-        "org.apache.spark" % "spark-streaming_2.10" % Versions.spark notTransitive,
-        "org.apache.spark" % "spark-streaming-kafka_2.10" % Versions.spark notTransitive,
+        "org.apache.spark" %% "spark-core" % Versions.spark,
+        "org.apache.spark" %% "spark-streaming" % Versions.spark,
 
-        "org.apache.kafka" %% "kafka" % Versions.kafka notTransitive,
-
-        "org.apache.zookeeper" % "zookeeper" % Versions.zookeeper notTransitive,
-
-        "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
         "org.slf4j" % "slf4j-api" % "1.7.10",
         "ch.qos.logback" % "logback-classic" % "1.1.2",
 
-        "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-
-        "org.apache.curator" % "curator-test" % "2.7.1" % "test" notTransitive
-      )
-    ) ++ scalastyleSettings ++ scoverageSettings ++ revolverSettings ++ graphSettings
+        "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+      ).map(_.exclude(
+        "org.slf4j", "slf4j-log4j12"
+      ))
+    ) ++ scalastyleSettings ++ scoverageSettings
 
 }
 
