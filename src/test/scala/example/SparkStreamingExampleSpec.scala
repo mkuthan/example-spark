@@ -1,18 +1,26 @@
 package example
 
+import java.nio.file.Files
+
 import org.apache.spark._
 import org.apache.spark.streaming._
+import org.apache.spark.streaming.dstream.ConstantInputDStream
 import org.scalatest._
-import org.apache.spark.streaming.util.ManualClock
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{Seconds => ScalatestSeconds, Span}
 
-class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen with Matchers {
+import scala.collection.mutable.ListBuffer
+
+class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen with Matchers with Eventually {
 
   private val master = "local[2]"
   private val appName = "example-spark-streaming"
   private val batchDuration = Seconds(1)
-  private val windowDuration = Seconds(30)
-  private val slideDuration = Seconds(3)
+  private val windowDuration = Seconds(4)
+  private val slideDuration = Seconds(2)
+  private val checkpointDir = Files.createTempDirectory(appName).toString
 
+  private var sc: SparkContext = _
   private var ssc: StreamingContext = _
   //private var mc: ManualClock = _
 
@@ -20,9 +28,12 @@ class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenW
     val conf = new SparkConf()
       .setMaster(master)
       .setAppName(appName)
-      .set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
+    //.set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
 
     ssc = new StreamingContext(conf, batchDuration)
+    ssc.checkpoint(checkpointDir)
+
+    sc = ssc.sparkContext
     //mc = ssc.scheduler.clock.asInstanceOf[ManualClock]
   }
 
@@ -31,27 +42,31 @@ class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenW
       ssc.stop()
     }
 
-    System.clearProperty("spark.streaming.clock")
+    //System.clearProperty("spark.streaming.clock")
 
     // avoid Akka rebinding
     System.clearProperty("spark.driver.port")
     System.clearProperty("spark.hostPort")
   }
 
-  "Empty set" should "be counted" in {
+  "Sample set" should "be counted" in {
     Given("empty set")
-    val lines = Array("")
+    val lines = Array("aaa", "bbb", "aaa", "ccc")
 
+    var results = ListBuffer.empty[Array[WordCount]]
     When("count words")
-    /*
-    WordCount.count(ssc.parallelize(lines), windowDuration, slideDuration) { (wordsCount: Array[WordCount], time: Time) =>
-      val counts = time + ": " + wordsCount.mkString("[", ", ", "]")
-      println(counts)
+    WordCount.count(new ConstantInputDStream(ssc, sc.parallelize(lines)), windowDuration, slideDuration) { (wordsCount: Array[WordCount], time: Time) =>
+      results += wordsCount
     }
-    */
 
-    Then("empty count")
-    //wordCounts shouldBe empty
+    ssc.start()
+
+    Then("words counted")
+    eventually(timeout(Span(8, ScalatestSeconds)), interval(Span(1, ScalatestSeconds))) {
+      results should (
+        have size 4
+        )
+    }
   }
 
 }
