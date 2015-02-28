@@ -3,12 +3,13 @@ package example
 import java.nio.file.Files
 
 import org.apache.spark._
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
-import org.apache.spark.streaming.dstream.ConstantInputDStream
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Seconds => ScalatestSeconds, Span}
+import org.scalatest.time.SpanSugar._
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen with Matchers with Eventually {
@@ -22,19 +23,19 @@ class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenW
 
   private var sc: SparkContext = _
   private var ssc: StreamingContext = _
-  //private var mc: ManualClock = _
+  private var clock: ClockWrapper = _
 
   before {
     val conf = new SparkConf()
       .setMaster(master)
       .setAppName(appName)
-    //.set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
+      .set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
 
     ssc = new StreamingContext(conf, batchDuration)
     ssc.checkpoint(checkpointDir)
 
     sc = ssc.sparkContext
-    //mc = ssc.scheduler.clock.asInstanceOf[ManualClock]
+    clock = new ClockWrapper(ssc)
   }
 
   after {
@@ -42,30 +43,64 @@ class SparkStreamingExampleSpec extends FlatSpec with BeforeAndAfter with GivenW
       ssc.stop()
     }
 
-    //System.clearProperty("spark.streaming.clock")
-
-    // avoid Akka rebinding
-    System.clearProperty("spark.driver.port")
-    System.clearProperty("spark.hostPort")
+    System.clearProperty("spark.streaming.clock")
   }
 
   "Sample set" should "be counted" in {
-    Given("empty set")
-    val lines = Array("aaa", "bbb", "aaa", "ccc")
+    Given("streaming context is initialized")
+    val lines = mutable.Queue[RDD[String]]()
 
     var results = ListBuffer.empty[Array[WordCount]]
-    When("count words")
-    WordCount.count(new ConstantInputDStream(ssc, sc.parallelize(lines)), windowDuration, slideDuration) { (wordsCount: Array[WordCount], time: Time) =>
-      results += wordsCount
+
+    WordCount.count(ssc.queueStream(lines), windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
+      results += wordsCount.collect()
     }
 
     ssc.start()
 
-    Then("words counted")
-    eventually(timeout(Span(8, ScalatestSeconds)), interval(Span(1, ScalatestSeconds))) {
-      results should (
-        have size 4
-        )
+    When("first set of words queued")
+    lines += sc.makeRDD(Seq("a", "b"))
+
+    Then("words counted after first slide")
+    clock.advance(slideDuration.milliseconds)
+    eventually(timeout(1 second)) {
+      results.last should equal(Array(
+        WordCount("a", 1),
+        WordCount("b", 1)))
+    }
+
+    When("second set of words queued")
+    lines += sc.makeRDD(Seq("b", "c"))
+
+    Then("words counted after second slide")
+    clock.advance(slideDuration.milliseconds)
+    eventually(timeout(1 second)) {
+      results.last should equal(Array(
+        WordCount("a", 1),
+        WordCount("b", 2),
+        WordCount("c", 1)))
+    }
+
+    When("nothing more queued")
+
+    Then("word counted after third slide")
+    clock.advance(slideDuration.milliseconds)
+    eventually(timeout(1 second)) {
+      results.last should equal(Array(
+        WordCount("a", 0),
+        WordCount("b", 1),
+        WordCount("c", 1)))
+    }
+
+    When("nothing more queued")
+
+    Then("word counted after fourth slide")
+    clock.advance(slideDuration.milliseconds)
+    eventually(timeout(1 second)) {
+      results.last should equal(Array(
+        WordCount("a", 0),
+        WordCount("b", 0),
+        WordCount("c", 0)))
     }
   }
 

@@ -1,9 +1,9 @@
 package example
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark._
 
-
-object SparkExample {
+object SparkExample extends LazyLogging {
 
   private val master = "local[2]"
   private val appName = "example-spark"
@@ -20,6 +20,6 @@ object SparkExample {
     val lines = sc.textFile("src/main/resources/data")
     val counts = WordCount.count(lines, stopWords)
 
-    println(counts.collect().mkString("[", ", ", "]"))
+    logger.info(counts.collect().mkString("[", ", ", "]"))
   }
 }

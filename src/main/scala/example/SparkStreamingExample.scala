@@ -2,13 +2,15 @@ package example
 
 import java.nio.file.Files
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 
 /**
  * To run this example, run Netcat server first: <code>nc -lk 9999</code>.
  */
-object SparkStreamingExample {
+object SparkStreamingExample extends LazyLogging {
 
   private val master = "local[2]"
   private val appName = "example-spark-streaming"
@@ -28,9 +30,9 @@ object SparkStreamingExample {
     ssc.checkpoint(checkpointDir)
 
     val lines = ssc.socketTextStream("localhost", 9999)
-    WordCount.count(lines, windowDuration, slideDuration, stopWords) { (wordsCount: Array[WordCount], time: Time) =>
-      val counts = time + ": " + wordsCount.mkString("[", ", ", "]")
-      println(counts)
+    WordCount.count(lines, windowDuration, slideDuration, stopWords) { (wordsCount: RDD[WordCount], time: Time) =>
+      val counts = time + ": " + wordsCount.collect().mkString("[", ", ", "]")
+      logger.info(counts)
     }
 
     ssc.start()

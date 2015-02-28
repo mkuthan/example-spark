@@ -22,10 +22,6 @@ class SparkExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     if (sc != null) {
       sc.stop()
     }
-
-    // avoid Akka rebinding
-    System.clearProperty("spark.driver.port")
-    System.clearProperty("spark.hostPort")
   }
 
   "Empty set" should "be counted" in {
@@ -50,17 +46,14 @@ class SparkExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     val wordCounts = WordCount.count(sc.parallelize(lines), stopWords).collect()
 
     Then("words counted")
-    wordCounts should (
-      have size 7 and
-        contain inOrderOnly(
-        WordCount("be", 2),
-        WordCount("to", 2),
-        WordCount("is", 1),
-        WordCount("question", 1),
-        WordCount("not", 1),
-        WordCount("that", 1),
-        WordCount("or", 1))
-      )
+    wordCounts should equal(Array(
+      WordCount("be", 2),
+      WordCount("is", 1),
+      WordCount("not", 1),
+      WordCount("or", 1),
+      WordCount("question", 1),
+      WordCount("that", 1),
+      WordCount("to", 2)))
   }
 
 }

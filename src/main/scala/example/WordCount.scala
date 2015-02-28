@@ -10,6 +10,8 @@ case class WordCount(word: String, count: Int)
 
 object WordCount {
 
+  type WordHandler = (RDD[WordCount], Time) => Unit
+
   def count(lines: RDD[String]): RDD[WordCount] = count(lines, Set())
 
   def count(lines: RDD[String], stopWords: Set[String]): RDD[WordCount] = {
@@ -21,14 +23,21 @@ object WordCount {
       case (word: String, count: Int) => WordCount(word, count)
     }
 
-    val sortedWordCounts = wordCounts.sortBy(_.count, ascending = false)
+    val sortedWordCounts = wordCounts.sortBy(_.word)
 
     sortedWordCounts
   }
 
-  def count(lines: DStream[String], windowDuration: Duration, slideDuration: Duration)(handler: (Array[WordCount], Time) => Unit): Unit = count(lines, windowDuration, slideDuration, Set())(handler)
+  def count(lines: DStream[String],
+            windowDuration: Duration,
+            slideDuration: Duration)
+           (handler: WordHandler): Unit = count(lines, windowDuration, slideDuration, Set())(handler)
 
-  def count(lines: DStream[String], windowDuration: Duration, slideDuration: Duration, stopWords: Set[String])(handler: (Array[WordCount], Time) => Unit): Unit = {
+  def count(lines: DStream[String],
+            windowDuration: Duration,
+            slideDuration: Duration,
+            stopWords: Set[String])
+           (handler: WordHandler): Unit = {
     val words = lines.flatMap(_.split("\\s"))
       .map(_.strip(",").strip(".").toLowerCase)
       .filter(!stopWords.contains(_)).filter(!_.isEmpty)
@@ -38,7 +47,7 @@ object WordCount {
     }
 
     wordCounts.foreachRDD((rdd: RDD[WordCount], time: Time) => {
-      handler(rdd.collect(), time)
+      handler(rdd.sortBy(_.word), time)
     })
   }
 
