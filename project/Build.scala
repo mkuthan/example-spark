@@ -43,8 +43,8 @@ object BuildSettings {
         "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
       ),
       libraryDependencies ++= Seq(
-        "org.apache.spark" %% "spark-core" % Versions.spark,
-        "org.apache.spark" %% "spark-streaming" % Versions.spark,
+        "org.apache.spark" %% "spark-core" % Versions.spark % "provided",
+        "org.apache.spark" %% "spark-streaming" % Versions.spark % "provided",
 
         "org.slf4j" % "slf4j-api" % "1.7.10",
         "ch.qos.logback" % "logback-classic" % "1.1.2",

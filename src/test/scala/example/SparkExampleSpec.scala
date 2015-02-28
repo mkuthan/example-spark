@@ -1,10 +1,9 @@
 package example
 
 import org.apache.spark._
-import org.apache.spark.SparkContext._
-import org.scalatest.{Matchers, GivenWhenThen, BeforeAndAfter, FunSuite}
+import org.scalatest._
 
-class SparkExampleSpec extends FunSuite with BeforeAndAfter with GivenWhenThen with Matchers {
+class SparkExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen with Matchers {
 
   private val master = "local[2]"
   private val appName = "example-spark"
@@ -12,7 +11,11 @@ class SparkExampleSpec extends FunSuite with BeforeAndAfter with GivenWhenThen w
   private var sc: SparkContext = _
 
   before {
-    sc = new SparkContext(master, appName)
+    val conf = new SparkConf()
+      .setMaster(master)
+      .setAppName(appName)
+
+    sc = new SparkContext(conf)
   }
 
   after {
@@ -25,8 +28,19 @@ class SparkExampleSpec extends FunSuite with BeforeAndAfter with GivenWhenThen w
     System.clearProperty("spark.hostPort")
   }
 
-  test("Should pass") {
-    Given("few lines of text")
+  "Empty set" should "be counted" in {
+    Given("empty set")
+    val lines = Array("")
+
+    When("count words")
+    val wordCounts = WordCount.count(sc.parallelize(lines)).collect()
+
+    Then("empty count")
+    wordCounts shouldBe empty
+  }
+
+  "Shakespeare most famous quote" should "be counted" in {
+    Given("quote")
     val lines = Array("To be or not to be.", "That is the question.")
 
     Given("stop words")

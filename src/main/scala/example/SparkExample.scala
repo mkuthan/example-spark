@@ -1,9 +1,6 @@
 package example
 
-import java.nio.file.Files
-
 import org.apache.spark._
-import org.apache.spark.SparkContext._
 
 
 object SparkExample {

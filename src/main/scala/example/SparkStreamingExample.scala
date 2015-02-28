@@ -1,13 +1,9 @@
 package example
 
 import java.nio.file.Files
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import org.apache.spark.SparkConf
-import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
-import org.apache.spark.streaming.StreamingContext._
 
 /**
  * To run this example, run Netcat server first: <code>nc -lk 9999</code>.
@@ -32,7 +28,10 @@ object SparkStreamingExample {
     ssc.checkpoint(checkpointDir)
 
     val lines = ssc.socketTextStream("localhost", 9999)
-    WordCount.count(lines, windowDuration, slideDuration, stopWords)
+    WordCount.count(lines, windowDuration, slideDuration, stopWords) { (wordsCount: Array[WordCount], time: Time) =>
+      val counts = time + ": " + wordsCount.mkString("[", ", ", "]")
+      println(counts)
+    }
 
     ssc.start()
     ssc.awaitTermination()
