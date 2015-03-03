@@ -40,7 +40,6 @@ object ApplicationBuild extends Build {
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
     "-Ywarn-unused-import")
 
   val customResolvers = Seq(
@@ -52,6 +51,7 @@ object ApplicationBuild extends Build {
 
   val customLibraryDependencies = Seq(
     "org.apache.spark" %% "spark-core" % Versions.spark,
+    "org.apache.spark" %% "spark-sql" % Versions.spark,
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
 
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
