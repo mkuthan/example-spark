@@ -15,9 +15,7 @@ object WordCount {
   def count(lines: RDD[String]): RDD[WordCount] = count(lines, Set())
 
   def count(lines: RDD[String], stopWords: Set[String]): RDD[WordCount] = {
-    val words = lines.flatMap(_.split("\\s"))
-      .map(_.strip(",").strip(".").toLowerCase)
-      .filter(!stopWords.contains(_)).filter(!_.isEmpty)
+    val words = prepareWords(lines, stopWords)
 
     val wordCounts = words.map(word => (word, 1)).reduceByKey(_ + _).map {
       case (word: String, count: Int) => WordCount(word, count)
@@ -38,9 +36,7 @@ object WordCount {
             slideDuration: Duration,
             stopWords: Set[String])
            (handler: WordHandler): Unit = {
-    val words = lines.flatMap(_.split("\\s"))
-      .map(_.strip(",").strip(".").toLowerCase)
-      .filter(!stopWords.contains(_)).filter(!_.isEmpty)
+    val words = lines.transform(prepareWords(_, stopWords))
 
     val wordCounts = words.map(x => (x, 1)).reduceByKeyAndWindow(_ + _, _ - _, windowDuration, slideDuration).map {
       case (word: String, count: Int) => WordCount(word, count)
@@ -49,6 +45,12 @@ object WordCount {
     wordCounts.foreachRDD((rdd: RDD[WordCount], time: Time) => {
       handler(rdd.sortBy(_.word), time)
     })
+  }
+
+  private def prepareWords(lines: RDD[String], stopWords: Set[String]): RDD[String] = {
+    lines.flatMap(_.split("\\s"))
+      .map(_.strip(",").strip(".").toLowerCase)
+      .filter(!stopWords.contains(_)).filter(!_.isEmpty)
   }
 
 }
