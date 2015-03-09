@@ -1,28 +1,9 @@
 package example
 
-import org.apache.spark._
+import org.mkuthan.spark.SparkSpec
 import org.scalatest._
 
-class SparkExampleSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen with Matchers {
-
-  private val master = "local[2]"
-  private val appName = "example-spark"
-
-  private var sc: SparkContext = _
-
-  before {
-    val conf = new SparkConf()
-      .setMaster(master)
-      .setAppName(appName)
-
-    sc = new SparkContext(conf)
-  }
-
-  after {
-    if (sc != null) {
-      sc.stop()
-    }
-  }
+class SparkExampleSpec extends FlatSpec with SparkSpec with GivenWhenThen with Matchers {
 
   "Empty set" should "be counted" in {
     Given("empty set")

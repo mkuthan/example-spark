@@ -1,8 +1,8 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.sql._
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * http://en.wikibooks.org/wiki/SQL_Exercises/Employee_management
@@ -21,6 +21,9 @@ object SparkSqlExample extends LazyLogging {
     val sc = new SparkContext(conf)
     val sqlc = new SQLContext(sc)
 
+    val employeeDao = new EmployeeDao(sqlc)
+    val departmentDao = new DepartmentDao(sqlc)
+
     import sqlc.createSchemaRDD
 
     val employees = sc.textFile("src/main/resources/data/employees.txt")
@@ -34,42 +37,29 @@ object SparkSqlExample extends LazyLogging {
     departments.registerTempTable("departments")
 
     logger.info("Select the last name of all employees")
-    val lastNames = sqlc.sql("SELECT lastName FROM employees")
-    lastNames.collect().foreach(println)
+    employeeDao.lastNames().collect().foreach(println)
 
     logger.info("Select the last name of all employees, without duplicates.")
-    val distinctLastNames = sqlc.sql("SELECT DISTINCT lastName FROM employees")
-    distinctLastNames.collect().foreach(println)
+    employeeDao.distinctLastNames().collect().foreach(println)
 
     logger.info("Select all the data of employees whose last name is \"Smith\".")
-    val smith = sqlc.sql("SELECT * FROM employees WHERE lastName = 'Smith'")
-    smith.collect().foreach(println)
+    employeeDao.byLastName("Smith").collect().foreach(println)
 
     logger.info("Select all the data of employees whose last name is \"Smith\" or \"Doe\".")
-    val smithOrDoe = sqlc.sql("SELECT * FROM employees WHERE lastName IN ('Smith', 'Doe')")
-    smithOrDoe.collect().foreach(println)
+    employeeDao.byLastName("Smith", "Doe").collect().foreach(println)
 
     logger.info("Select all the data of employees whose last name begins with an \"S\".")
-    val beginsWithS = sqlc.sql("SELECT * FROM employees WHERE lastName LIKE 'S%'")
-    beginsWithS.collect().foreach(println)
+    employeeDao.byLastNameLike("S").collect().foreach(println)
 
     logger.info("Select the sum of all the departments' budgets.")
-    val budgets = sqlc.sql("SELECT SUM(budget) FROM departments")
-    budgets.collect().foreach(println)
+    println(departmentDao.sumBudgets())
 
     logger.info("Select the number of employees in each department.")
-    val numberOfEmployees = sqlc.sql("SELECT department, COUNT(*)  FROM employees GROUP BY department")
-    numberOfEmployees.collect().foreach(println)
+    departmentDao.numberOfEmployees().collect().foreach(println)
 
-    logger.info("Select all the data of employees, including each employee's department's data.")
-    val employyesWithDepartmentsSql =
-      """
-        |SELECT ssn, e.name AS name_e, lastName, d.name AS name_d, department, code, budget
-        | FROM employees e INNER JOIN departments d
-        | ON e.department = d.code;
-      """.stripMargin
-    //val employyesWithDepartments = sqlc.sql(employyesWithDepartmentsSql)
-    //employyesWithDepartments.collect().foreach(println)
+    //logger.info("Select all the data of employees, including each employee's department's data.")
+    //val employeesWithDepartments = employeeDao.withDepartment()
+    //employeesWithDepartments.collect().foreach(println)
 
   }
 

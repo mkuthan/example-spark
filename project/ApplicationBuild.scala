@@ -71,6 +71,7 @@ object ApplicationBuild extends Build {
       version := "1.0",
       organization := "http://mkuthan.github.io/",
       scalaVersion := "2.11.4",
+      parallelExecution in Test := false,
       scalacOptions ++= customScalacOptions,
       resolvers ++= customResolvers,
       libraryDependencies ++= customLibraryDependencies
