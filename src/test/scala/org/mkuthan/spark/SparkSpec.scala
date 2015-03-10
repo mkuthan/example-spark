@@ -16,7 +16,6 @@ trait SparkSpec extends BeforeAndAfterAll {
   val conf: SparkConf = new SparkConf()
     .setMaster(master)
     .setAppName(appName)
-    .set("spark.driver.allowMultipleContexts", "true")
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -26,6 +25,7 @@ trait SparkSpec extends BeforeAndAfterAll {
   override def afterAll(): Unit = {
     if (_sc != null) {
       _sc.stop()
+      _sc = null
     }
 
     super.afterAll()

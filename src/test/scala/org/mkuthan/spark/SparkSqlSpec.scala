@@ -16,5 +16,11 @@ trait SparkSqlSpec extends SparkSpec {
     _sqlc = new SQLContext(sc)
   }
 
+  override def afterAll(): Unit = {
+    _sqlc = null
+
+    super.afterAll()
+  }
+
 
 }

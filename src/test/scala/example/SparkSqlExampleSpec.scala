@@ -3,7 +3,7 @@ package example
 import org.mkuthan.spark.SparkSqlSpec
 import org.scalatest._
 
-@Ignore
+//@Ignore
 // http://apache-spark-user-list.1001560.n3.nabble.com/ScalaReflectionException-when-using-saveAsParquetFile-in-sbt-td21020.html
 class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen with Matchers {
 

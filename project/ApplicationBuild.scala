@@ -42,6 +42,14 @@ object ApplicationBuild extends Build {
     "-Ywarn-numeric-widen",
     "-Ywarn-unused-import")
 
+  val customJavaInRuntimeOptions = Seq(
+    "-Xmx512m"
+  )
+
+  val customJavaInTestOptions = Seq(
+    "-Xmx512m"
+  )
+
   val customResolvers = Seq(
     Classpaths.sbtPluginReleases,
     Classpaths.typesafeReleases,
@@ -71,10 +79,13 @@ object ApplicationBuild extends Build {
       version := "1.0",
       organization := "http://mkuthan.github.io/",
       scalaVersion := "2.11.4",
-      parallelExecution in Test := false,
+      javaOptions in Runtime ++= customJavaInRuntimeOptions,
+      javaOptions in Test ++= customJavaInTestOptions,
       scalacOptions ++= customScalacOptions,
       resolvers ++= customResolvers,
-      libraryDependencies ++= customLibraryDependencies
+      libraryDependencies ++= customLibraryDependencies,
+      parallelExecution in Test := false,
+      fork in Test := true
     ) ++ scalastyleSettings ++ scoverageSettings
   )
 

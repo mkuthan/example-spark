@@ -33,10 +33,10 @@ trait SparkStreamingSpec extends SparkSpec {
 
   override def afterAll(): Unit = {
     if (_ssc != null) {
-      _ssc.stop()
+      // TODO: check why context can't be stopped with stopGracefully = true
+      _ssc.stop(stopSparkContext = false, stopGracefully = false)
+      _ssc = null
     }
-
-    System.clearProperty("spark.streaming.clock")
 
     super.afterAll()
   }
