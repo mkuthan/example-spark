@@ -5,7 +5,7 @@ import org.apache.spark.streaming._
 import org.mkuthan.spark.SparkStreamingSpec
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.SpanSugar._
+import org.scalatest.time.{Millis, Span}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -14,6 +14,10 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
   private val windowDuration = Seconds(4)
   private val slideDuration = Seconds(2)
+
+  // default timeout for eventually trait
+  implicit override val patienceConfig =
+    PatienceConfig(timeout = scaled(Span(1500, Millis)))
 
   "Sample set" should "be counted" in {
     Given("streaming context is initialized")
@@ -32,7 +36,7 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
     Then("words counted after first slide")
     clock.advance(slideDuration.milliseconds)
-    eventually(timeout(2 seconds)) {
+    eventually {
       results.last should equal(Array(
         WordCount("a", 1),
         WordCount("b", 1)))
@@ -43,7 +47,7 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
     Then("words counted after second slide")
     clock.advance(slideDuration.milliseconds)
-    eventually(timeout(2 seconds)) {
+    eventually {
       results.last should equal(Array(
         WordCount("a", 1),
         WordCount("b", 2),
@@ -54,7 +58,7 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
     Then("word counted after third slide")
     clock.advance(slideDuration.milliseconds)
-    eventually(timeout(2 seconds)) {
+    eventually {
       results.last should equal(Array(
         WordCount("a", 0),
         WordCount("b", 1),
@@ -65,7 +69,7 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
     Then("word counted after fourth slide")
     clock.advance(slideDuration.milliseconds)
-    eventually(timeout(2 seconds)) {
+    eventually {
       results.last should equal(Array(
         WordCount("a", 0),
         WordCount("b", 0),

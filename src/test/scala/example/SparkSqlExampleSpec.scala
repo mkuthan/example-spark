@@ -45,13 +45,13 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   "The last name of all employees" should "be selected" in {
     val lastNames = employeeDao.lastNames().collect()
 
-    lastNames should have length (12)
+    lastNames should have length 12
   }
 
   "The last name of all employees" should "be selected without duplicates" in {
     val distinctLastNames = employeeDao.distinctLastNames().collect()
 
-    distinctLastNames should have length (10)
+    distinctLastNames should have length 10
   }
 
   "The employees whose last name is 'Smith'" should "be selected" in {
@@ -105,7 +105,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   ignore should "All employees including each employee's department's data be selected" in {
     val employeesWithDepartment = employeeDao.withDepartment().collect()
 
-    employeesWithDepartment should have length (12)
+    employeesWithDepartment should have length 12
   }
 
 }

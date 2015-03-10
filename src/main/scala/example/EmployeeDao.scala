@@ -14,9 +14,9 @@ class EmployeeDao(sqlc: SQLContext) {
 
   def distinctLastNames(): RDD[String] = sqlc.sql("SELECT DISTINCT lastName FROM employees").map(row => row.getString(0))
 
-  def byLastName(lastNames: String*): RDD[Employee] = sqlc.sql(s"SELECT * FROM employees WHERE lastName IN(${lastNames.mkString("'", "', '", "'")})").map(toEmployee(_))
+  def byLastName(lastNames: String*): RDD[Employee] = sqlc.sql(s"SELECT * FROM employees WHERE lastName IN(${lastNames.mkString("'", "', '", "'")})").map(toEmployee)
 
-  def byLastNameLike(lastName: String): RDD[Employee] = sqlc.sql(s"SELECT * FROM employees WHERE lastName LIKE '${lastName}%'").map(toEmployee(_))
+  def byLastNameLike(lastName: String): RDD[Employee] = sqlc.sql(s"SELECT * FROM employees WHERE lastName LIKE '$lastName%'").map(toEmployee)
 
   def withDepartment(): RDD[(String, String, String, String, Int, Int)] = {
     val sql =
