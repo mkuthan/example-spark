@@ -20,7 +20,8 @@ import sbt._
 object ApplicationBuild extends Build {
 
   object Versions {
-    val spark = "1.2.1"
+    // SPARK-8630, after this change QueueInputDStream throws an exception if checkpointing is enabled
+    val spark = "1.4.0"
   }
 
   val projectName = "example-spark"

@@ -32,11 +32,15 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
     Department(77, "Research", 55000)
   )
 
-  override  def beforeAll(): Unit = {
+  override def beforeAll(): Unit = {
     super.beforeAll()
 
-    sqlc.createSchemaRDD(sc.parallelize(employees)).registerTempTable("employees")
-    sqlc.createSchemaRDD(sc.parallelize(departments)).registerTempTable("departments")
+    val _sqlc = sqlc
+
+    import _sqlc.implicits._
+
+    sc.parallelize(employees).toDF().registerTempTable("employees")
+    sc.parallelize(departments).toDF().registerTempTable("departments")
 
     employeeDao = new EmployeeDao(sqlc)
     departmentDao = new DepartmentDao(sqlc)

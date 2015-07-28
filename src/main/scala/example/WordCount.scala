@@ -1,10 +1,8 @@
 package example
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.StreamingContext._
-import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.{Duration, Time}
 
 case class WordCount(word: String, count: Int)
 

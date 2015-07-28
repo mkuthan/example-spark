@@ -1,7 +1,7 @@
 package org.mkuthan.spark
 
 import java.nio.file.Files
-
+import org.apache.spark.ClockWrapper
 import org.apache.spark.streaming._
 import org.scalatest._
 
