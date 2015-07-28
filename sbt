@@ -4,8 +4,8 @@
 # Author: Paul Phillips <paulp@improving.org>
 
 # todo - make this dynamic
-declare -r sbt_release_version="0.13.7"
-declare -r sbt_unreleased_version="0.13.8-M1"
+declare -r sbt_release_version="0.13.8"
+declare -r sbt_unreleased_version="0.13.8"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
@@ -105,8 +105,8 @@ declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opt
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
-declare -r latest_210="2.10.4"
-declare -r latest_211="2.11.5"
+declare -r latest_210="2.10.5"
+declare -r latest_211="2.11.6"
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
@@ -162,17 +162,21 @@ setJavaHome () {
   java_cmd="$1/bin/java"
   setThisBuild javaHome "Some(file(\"$1\"))"
   export JAVA_HOME="$1"
+  export JDK_HOME="$1"
   export PATH="$JAVA_HOME/bin:$PATH"
 }
 setJavaHomeQuietly () {
   java_cmd="$1/bin/java"
   addSbt ";warn ;set javaHome in ThisBuild := Some(file(\"$1\")) ;info"
   export JAVA_HOME="$1"
+  export JDK_HOME="$1"
   export PATH="$JAVA_HOME/bin:$PATH"
 }
 
-# if set, use JAVA_HOME over java found in path
-if [[ -e "$JAVA_HOME/bin/java" ]]; then
+# if set, use JDK_HOME/JAVA_HOME over java found in path
+if [[ -e "$JDK_HOME/lib/tools.jar" ]]; then
+  setJavaHomeQuietly "$JDK_HOME"
+elif [[ -e "$JAVA_HOME/bin/java" ]]; then
   setJavaHomeQuietly "$JAVA_HOME"
 fi
 

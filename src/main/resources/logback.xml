@@ -5,7 +5,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.apache.spark" level="WARN" />
+  <logger name="org.apache.spark" level="DEBUG" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT"/>

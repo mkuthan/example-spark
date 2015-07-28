@@ -14,17 +14,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sbt._
 import sbt.Keys._
+import sbt._
 
 object ApplicationBuild extends Build {
-
-  import org.scalastyle.sbt.ScalastylePlugin.{Settings => scalastyleSettings}
-  import scoverage.ScoverageSbtPlugin.{buildSettings => scoverageSettings}
 
   object Versions {
     val spark = "1.2.1"
   }
+
+  val projectName = "example-spark"
+
+  val common = Seq(
+    version := "1.0",
+    organization := "http://mkuthan.github.io/",
+    scalaVersion := "2.11.7"
+  )
 
   val customScalacOptions = Seq(
     "-deprecation",
@@ -40,7 +45,8 @@ object ApplicationBuild extends Build {
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import")
+    "-Ywarn-unused-import"
+  )
 
   val customJavaInRuntimeOptions = Seq(
     "-Xmx512m"
@@ -68,26 +74,22 @@ object ApplicationBuild extends Build {
     "ch.qos.logback" % "logback-classic" % "1.1.2",
 
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
-  ).map(_.exclude(
-    "org.slf4j", "slf4j-log4j12"
-  ))
-
-  lazy val main = Project(
-    id = "example-spark",
-    base = file("."),
-    settings = Defaults.coreDefaultSettings ++ Seq(
-      version := "1.0",
-      organization := "http://mkuthan.github.io/",
-      scalaVersion := "2.11.4",
-      javaOptions in Runtime ++= customJavaInRuntimeOptions,
-      javaOptions in Test ++= customJavaInTestOptions,
-      scalacOptions ++= customScalacOptions,
-      resolvers ++= customResolvers,
-      libraryDependencies ++= customLibraryDependencies,
-      parallelExecution in Test := false,
-      fork in Test := true
-    ) ++ scalastyleSettings ++ scoverageSettings
   )
+
+  val customExcludeDependencies = Seq(
+    "org.slf4j" % "slf4j-log4j12"
+  )
+
+  lazy val main = Project(projectName, base = file("."))
+    .settings(common)
+    .settings(javaOptions in Runtime ++= customJavaInRuntimeOptions)
+    .settings(javaOptions in Test ++= customJavaInTestOptions)
+    .settings(scalacOptions ++= customScalacOptions)
+    .settings(resolvers ++= customResolvers)
+    .settings(libraryDependencies ++= customLibraryDependencies)
+    .settings(excludeDependencies ++= customExcludeDependencies)
+    .settings(parallelExecution in Test := false)
+    .settings(fork in Test := true)
 
 }
 
