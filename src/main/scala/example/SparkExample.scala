@@ -23,6 +23,7 @@ object SparkExample extends LazyLogging {
 
   private val master = "local[2]"
   private val appName = "example-spark"
+  private val stopWords = Set("a", "an", "the")
 
   def main(args: Array[String]): Unit = {
 
@@ -32,9 +33,10 @@ object SparkExample extends LazyLogging {
 
     val sc = new SparkContext(conf)
 
-    val lines = sc.textFile("hdfs://zeus/tmp/metaitem_rules.csv")
-    val count = lines.count()
+    val lines = sc.textFile("src/main/resources/data/words.txt")
+    val wordsCount = WordCount.count(lines, stopWords)
 
-    logger.info(s"Count: $count")
+    val counts = wordsCount.collect().mkString("[", ", ", "]")
+    logger.info(counts)
   }
 }
