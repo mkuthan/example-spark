@@ -56,13 +56,6 @@ object ApplicationBuild extends Build {
     "-Xmx512m"
   )
 
-  val customResolvers = Seq(
-    Classpaths.sbtPluginReleases,
-    Classpaths.typesafeReleases,
-    "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/",
-    "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
-  )
-
   val customLibraryDependencies = Seq(
     "org.apache.spark" %% "spark-core" % Versions.spark,
     "org.apache.spark" %% "spark-sql" % Versions.spark,
@@ -85,7 +78,6 @@ object ApplicationBuild extends Build {
     .settings(javaOptions in Runtime ++= customJavaInRuntimeOptions)
     .settings(javaOptions in Test ++= customJavaInTestOptions)
     .settings(scalacOptions ++= customScalacOptions)
-    .settings(resolvers ++= customResolvers)
     .settings(libraryDependencies ++= customLibraryDependencies)
     .settings(excludeDependencies ++= customExcludeDependencies)
     .settings(parallelExecution in Test := false)
