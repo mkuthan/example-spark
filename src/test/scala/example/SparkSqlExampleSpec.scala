@@ -106,10 +106,23 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
     ))
   }
 
-  ignore should "All employees including each employee's department's data be selected" in {
+  "All employees including each employee's department's data" should "be selected" in {
     val employeesWithDepartment = employeeDao.withDepartment().collect()
 
-    employeesWithDepartment should have length 12
+    employeesWithDepartment should equal(Array(
+      ("222364883", "Carol", "Smith", "Accounting", 15000),
+      ("326587417", "Joe", "Stevens", "Accounting", 15000),
+      ("546523478", "John", "Doe", "Human Resources", 240000),
+      ("654873219", "Zacary", "Efron", "Human Resources", 240000),
+      ("745685214", "Eric", "Goldsmith", "Human Resources", 240000),
+      ("332569843", "George", "ODonnell", "Research", 55000),
+      ("631231482", "David", "Smith", "Research", 55000),
+      ("123234877", "Michael", "Rogers", "IT", 65000),
+      ("152934485", "Anand", "Manikutty", "IT", 65000),
+      ("332154719", "Mary-Anne", "Foster", "IT", 65000),
+      ("845657245", "Elizabeth", "Doe", "IT", 65000),
+      ("845657246", "Kumar", "Swamy", "IT", 65000)
+    ))
   }
 
 }

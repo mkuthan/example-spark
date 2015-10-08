@@ -59,6 +59,7 @@ object ApplicationBuild extends Build {
   val customLibraryDependencies = Seq(
     "org.apache.spark" %% "spark-core" % Versions.spark,
     "org.apache.spark" %% "spark-sql" % Versions.spark,
+    "org.apache.spark" %% "spark-hive" % Versions.spark,
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
 
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",

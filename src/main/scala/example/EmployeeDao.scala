@@ -42,17 +42,17 @@ class EmployeeDao(sqlc: SQLContext) {
     .sql(s"SELECT * FROM employees WHERE lastName LIKE '$lastName%'")
     .map(toEmployee)
 
-  def withDepartment(): RDD[(String, String, String, String, Int, Int)] = {
+  def withDepartment(): RDD[(String, String, String, String, Int)] = {
     val sql =
       """
         |SELECT ssn, e.name AS name_e, lastName, d.name AS name_d, budget
         | FROM employees e INNER JOIN departments d
-        | ON e.department = d.code;
+        | ON e.department = d.code
       """.stripMargin
 
     sqlc
       .sql(sql)
-      .map(row => (row.getString(0), row.getString(1), row.getString(2), row.getString(3), row.getInt(4), row.getInt(5)))
+      .map(row => (row.getString(0), row.getString(1), row.getString(2), row.getString(3), row.getInt(4)))
   }
 }
 

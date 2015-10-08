@@ -17,7 +17,7 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql._
+import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -35,7 +35,7 @@ object SparkSqlExample extends LazyLogging {
       .setAppName(appName)
 
     val sc = new SparkContext(conf)
-    val sqlc = new SQLContext(sc)
+    val sqlc = new HiveContext(sc)
 
     val employeeDao = new EmployeeDao(sqlc)
     val departmentDao = new DepartmentDao(sqlc)
@@ -73,9 +73,9 @@ object SparkSqlExample extends LazyLogging {
     logger.info("Select the number of employees in each department.")
     departmentDao.numberOfEmployees().collect().foreach(println)
 
-    //logger.info("Select all the data of employees, including each employee's department's data.")
-    //val employeesWithDepartments = employeeDao.withDepartment()
-    //employeesWithDepartments.collect().foreach(println)
+    logger.info("Select all the data of employees, including each employee's department's data.")
+    val employeesWithDepartments = employeeDao.withDepartment()
+    employeesWithDepartments.collect().foreach(println)
 
   }
 
