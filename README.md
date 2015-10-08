@@ -5,7 +5,7 @@
 Features
 ========
 
-* [ClockWrapper](src/test/scala/org/apache/spark/streaming/ClockWrapper.scala) for efficient clock management in Spark Streaming jobs.
+* [ClockWrapper](src/test/scala/org/apache/spark/ClockWrapper.scala) for efficient clock management in Spark Streaming jobs.
 * Base traits for testing [Spark](src/test/scala/org/mkuthan/spark/SparkSpec.scala), [Spark Streaming](src/test/scala/org/mkuthan/spark/SparkStreamingSpec.scala) and [Spark SQL](src/test/scala/org/mkuthan/spark/SparkSqlSpec.scala) to eliminate boilerplate code.
 * Sample applications to show how to make your code testable.
 * All tests can be run or debugged directly from IDE, or using SBT.
