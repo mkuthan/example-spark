@@ -25,7 +25,7 @@ class SparkStreamingExampleSpec extends FlatSpec with SparkStreamingSpec with Gi
 
     var results = ListBuffer.empty[Array[WordCount]]
 
-    WordCount.count(ssc.queueStream(lines), windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
+    WordCount.count(ssc, ssc.queueStream(lines), windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
       results += wordsCount.collect()
     }
 

@@ -34,7 +34,7 @@ object SparkExample extends LazyLogging {
     val sc = new SparkContext(conf)
 
     val lines = sc.textFile("src/main/resources/data/words.txt")
-    val wordsCount = WordCount.count(lines, stopWords)
+    val wordsCount = WordCount.count(sc, lines, stopWords)
 
     val counts = wordsCount.collect().mkString("[", ", ", "]")
     logger.info(counts)

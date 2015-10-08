@@ -46,7 +46,7 @@ object SparkStreamingExample extends LazyLogging {
     ssc.checkpoint(checkpointDir)
 
     val lines = ssc.socketTextStream("localhost", 9999)
-    WordCount.count(lines, windowDuration, slideDuration, stopWords) { (wordsCount: RDD[WordCount], time: Time) =>
+    WordCount.count(ssc, lines, windowDuration, slideDuration, stopWords) { (wordsCount: RDD[WordCount], time: Time) =>
       val counts = time + ": " + wordsCount.collect().mkString("[", ", ", "]")
       logger.info(counts)
     }

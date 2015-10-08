@@ -10,7 +10,7 @@ class SparkExampleSpec extends FlatSpec with SparkSpec with GivenWhenThen with M
     val lines = Array("")
 
     When("count words")
-    val wordCounts = WordCount.count(sc.parallelize(lines)).collect()
+    val wordCounts = WordCount.count(sc, sc.parallelize(lines)).collect()
 
     Then("empty count")
     wordCounts shouldBe empty
@@ -24,7 +24,7 @@ class SparkExampleSpec extends FlatSpec with SparkSpec with GivenWhenThen with M
     val stopWords = Set("the")
 
     When("count words")
-    val wordCounts = WordCount.count(sc.parallelize(lines), stopWords).collect()
+    val wordCounts = WordCount.count(sc, sc.parallelize(lines), stopWords).collect()
 
     Then("words counted")
     wordCounts should equal(Array(
