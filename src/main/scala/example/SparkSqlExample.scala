@@ -53,29 +53,29 @@ object SparkSqlExample extends LazyLogging {
     departments.toDF().registerTempTable("departments")
 
     logger.info("Select the last name of all employees")
-    employeeDao.lastNames().collect().foreach(println)
+    employeeDao.lastNames().collect().foreach(logger.info(_))
 
     logger.info("Select the last name of all employees, without duplicates.")
-    employeeDao.distinctLastNames().collect().foreach(println)
+    employeeDao.distinctLastNames().collect().foreach(logger.info(_))
 
     logger.info("Select all the data of employees whose last name is \"Smith\".")
-    employeeDao.byLastName("Smith").collect().foreach(println)
+    employeeDao.byLastName("Smith").collect().map(_.toString) foreach (logger.info(_))
 
     logger.info("Select all the data of employees whose last name is \"Smith\" or \"Doe\".")
-    employeeDao.byLastName("Smith", "Doe").collect().foreach(println)
+    employeeDao.byLastName("Smith", "Doe").collect().map(_.toString).foreach(logger.info(_))
 
     logger.info("Select all the data of employees whose last name begins with an \"S\".")
-    employeeDao.byLastNameLike("S").collect().foreach(println)
+    employeeDao.byLastNameLike("S").collect().map(_.toString).foreach(logger.info(_))
 
     logger.info("Select the sum of all the departments' budgets.")
-    println(departmentDao.sumBudgets())
+    logger.info(departmentDao.sumBudgets().toString)
 
     logger.info("Select the number of employees in each department.")
-    departmentDao.numberOfEmployees().collect().foreach(println)
+    departmentDao.numberOfEmployees().collect().map(_.toString()).foreach(logger.info(_))
 
     logger.info("Select all the data of employees, including each employee's department's data.")
     val employeesWithDepartments = employeeDao.withDepartment()
-    employeesWithDepartments.collect().foreach(println)
+    employeesWithDepartments.collect().map(_.toString).foreach(logger.info(_))
 
   }
 
