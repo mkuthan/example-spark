@@ -45,12 +45,14 @@ object SparkSqlExample extends LazyLogging {
     val employees = sc.textFile("src/main/resources/data/employees.txt")
       .map(_.split(","))
       .map(fields => Employee(fields(0), fields(1), fields(2), fields(3).trim.toInt))
-    employees.toDF().registerTempTable("employees")
+      .toDF()
+    employees.registerTempTable("employees")
 
     val departments = sc.textFile("src/main/resources/data/departments.txt")
       .map(_.split(","))
       .map(fields => Department(fields(0).trim.toInt, fields(1), fields(2).trim.toInt))
-    departments.toDF().registerTempTable("departments")
+      .toDF()
+    departments.registerTempTable("departments")
 
     logger.info("Select the last name of all employees")
     employeeDao.lastNames().collect().foreach(logger.info(_))
