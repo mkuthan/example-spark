@@ -1,3 +1,10 @@
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
 language: scala
 
 scala:
@@ -8,6 +15,10 @@ jdk:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test scalastyle
+
+  # Trick to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
 after_success:
   - sbt coveralls
