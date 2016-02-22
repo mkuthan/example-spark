@@ -20,7 +20,7 @@ import sbt._
 object ApplicationBuild extends Build {
 
   object Versions {
-    val spark = "1.5.1"
+    val spark = "1.6.0"
   }
 
   val projectName = "example-spark"
@@ -57,21 +57,19 @@ object ApplicationBuild extends Build {
   )
 
   val customLibraryDependencies = Seq(
-    "org.apache.spark" %% "spark-core" % Versions.spark,
-    "org.apache.spark" %% "spark-sql" % Versions.spark,
-    "org.apache.spark" %% "spark-hive" % Versions.spark,
-    "org.apache.spark" %% "spark-streaming" % Versions.spark,
+    "org.apache.spark" %% "spark-core" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-sql" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-hive" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-streaming" % Versions.spark % "provided",
 
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 
     "org.slf4j" % "slf4j-api" % "1.7.10",
-    "ch.qos.logback" % "logback-classic" % "1.1.2",
+    "org.slf4j" % "slf4j-log4j12" % "1.7.10" exclude("log4j", "log4j"),
+
+    "log4j" % "log4j" % "1.2.17" % "provided",
 
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
-  )
-
-  val customExcludeDependencies = Seq(
-    "org.slf4j" % "slf4j-log4j12"
   )
 
   lazy val main = Project(projectName, base = file("."))
@@ -80,9 +78,9 @@ object ApplicationBuild extends Build {
     .settings(javaOptions in Test ++= customJavaInTestOptions)
     .settings(scalacOptions ++= customScalacOptions)
     .settings(libraryDependencies ++= customLibraryDependencies)
-    .settings(excludeDependencies ++= customExcludeDependencies)
     .settings(parallelExecution in Test := false)
     .settings(fork in Test := true)
-
+    .settings(run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run)))
+    .settings(runMain in Compile <<= Defaults.runMainTask(fullClasspath in Compile, runner in(Compile, run)))
 }
 
