@@ -62,10 +62,16 @@ object ApplicationBuild extends Build {
     "org.apache.spark" %% "spark-hive" % Versions.spark % "provided",
     "org.apache.spark" %% "spark-streaming" % Versions.spark % "provided",
 
+    "org.apache.spark" %% "spark-streaming-kafka" % Versions.spark
+      exclude("log4j", "log4j")
+      exclude("org.spark-project.spark", "unused"),
+
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 
     "org.slf4j" % "slf4j-api" % "1.7.10",
-    "org.slf4j" % "slf4j-log4j12" % "1.7.10" exclude("log4j", "log4j"),
+
+    "org.slf4j" % "slf4j-log4j12" % "1.7.10"
+      exclude("log4j", "log4j"),
 
     "log4j" % "log4j" % "1.2.17" % "provided",
 
