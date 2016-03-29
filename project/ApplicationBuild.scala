@@ -20,7 +20,7 @@ import sbt._
 object ApplicationBuild extends Build {
 
   object Versions {
-    val spark = "1.6.0"
+    val spark = "1.6.1"
   }
 
   val projectName = "example-spark"
