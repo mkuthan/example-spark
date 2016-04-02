@@ -17,7 +17,7 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark._
+import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkExample extends LazyLogging {
 

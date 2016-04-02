@@ -20,9 +20,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
-/**
- * http://en.wikibooks.org/wiki/SQL_Exercises/Employee_management
- */
+/** Based on http://en.wikibooks.org/wiki/SQL_Exercises/Employee_management. */
 object SparkSqlExample extends LazyLogging {
 
   private val master = "local[2]"

@@ -14,7 +14,7 @@ jdk:
   - oraclejdk8
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test scalastyle
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm

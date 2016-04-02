@@ -21,11 +21,9 @@ import java.nio.file.Files
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming._
+import org.apache.spark.streaming.{Seconds, StreamingContext, Time}
 
-/**
- * To run this example, run Netcat server first: <code>nc -lk 9999</code>.
- */
+/** To run this example, run Netcat server first: <code>nc -lk 9999</code>. */
 object SparkStreamingExample extends LazyLogging {
 
   private val master = "local[2]"

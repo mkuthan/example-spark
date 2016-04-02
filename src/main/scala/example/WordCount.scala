@@ -45,17 +45,17 @@ object WordCount {
   }
 
   def count(ssc: StreamingContext,
-            lines: DStream[String],
-            windowDuration: Duration,
-            slideDuration: Duration)
-           (handler: WordHandler): Unit = count(ssc, lines, windowDuration, slideDuration, Set())(handler)
+    lines: DStream[String],
+    windowDuration: Duration,
+    slideDuration: Duration)
+    (handler: WordHandler): Unit = count(ssc, lines, windowDuration, slideDuration, Set())(handler)
 
   def count(ssc: StreamingContext,
-            lines: DStream[String],
-            windowDuration: Duration,
-            slideDuration: Duration,
-            stopWords: Set[String])
-           (handler: WordHandler): Unit = {
+    lines: DStream[String],
+    windowDuration: Duration,
+    slideDuration: Duration,
+    stopWords: Set[String])
+    (handler: WordHandler): Unit = {
 
     val sc = ssc.sparkContext
     val stopWordsVar = sc.broadcast(stopWords)

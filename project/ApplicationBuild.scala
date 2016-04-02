@@ -78,15 +78,26 @@ object ApplicationBuild extends Build {
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
   )
 
+  lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+  lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+
   lazy val main = Project(projectName, base = file("."))
     .settings(common)
     .settings(javaOptions in Runtime ++= customJavaInRuntimeOptions)
     .settings(javaOptions in Test ++= customJavaInTestOptions)
     .settings(scalacOptions ++= customScalacOptions)
     .settings(libraryDependencies ++= customLibraryDependencies)
+    // spark does not support parallel tests and requires JVM fork
     .settings(parallelExecution in Test := false)
     .settings(fork in Test := true)
+    // add provided dependencies to the classpath for run and run-main tasks
     .settings(run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run)))
     .settings(runMain in Compile <<= Defaults.runMainTask(fullClasspath in Compile, runner in(Compile, run)))
+    // enable scalastyle checks during compilation
+    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value)
+    .settings(compile in Compile <<= (compile in Compile) dependsOn compileScalastyle)
+    // enable scalastyle checks during tests compilation
+    .settings(testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value)
+    .settings(test in Test <<= (test in Test) dependsOn testScalastyle)
 }
 
