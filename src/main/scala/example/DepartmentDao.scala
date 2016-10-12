@@ -16,20 +16,28 @@
 
 package example
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{Dataset, SparkSession}
 
-/** Notice: Variable binding is vulnerable for SQL injection. */
-class DepartmentDao(sqlc: SQLContext) {
+
+class DepartmentDao(spark: SparkSession, departments: Dataset[Department], employees: Dataset[Employee]) {
+
+  import org.apache.spark.sql.expressions.scalalang.typed.sumLong
+  import spark.implicits._
+
+
+  /*
+   * SELECT SUM(budget) FROM departments
+   */
 
   def sumBudgets(): Long =
-    sqlc
-      .sql("SELECT SUM(budget) FROM departments")
-      .map(row => row.getLong(0)).first()
+    departments.agg(sumLong[Department](_.budget)).as[Long].first()
 
-  def numberOfEmployees(): RDD[(Int, Long)] =
-    sqlc
-      .sql("SELECT department, COUNT(*) FROM employees GROUP BY department")
-      .map(row => (row.getInt(0), row.getLong(1)))
+  /*
+   * SELECT department, COUNT(*) FROM employees GROUP BY department
+   */
 
+  def numberOfEmployees(): Dataset[(Int, Long)] =
+    employees
+      .groupByKey(employee => employee.department)
+      .count()
 }

@@ -16,49 +16,53 @@
 
 package example
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.{Dataset, SparkSession}
 
-/** Notice: Variable binding is vulnerable for SQL injection. */
-class EmployeeDao(sqlc: SQLContext) {
+class EmployeeDao(spark: SparkSession, employees: Dataset[Employee], departments: Dataset[Department]) {
 
-  import example.EmployeeDao._
+  import spark.implicits._
 
-  def lastNames(): RDD[String] =
-    sqlc
-      .sql("SELECT lastName FROM employees")
-      .map(row => row.getString(0))
+  /*
+   * SELECT lastName FROM employees
+   */
 
-  def distinctLastNames(): RDD[String] =
-    sqlc
-      .sql("SELECT DISTINCT lastName FROM employees")
-      .map(row => row.getString(0))
+  def lastNames(): Dataset[String] =
+    employees.map(employee => employee.lastName)
 
-  def byLastName(lastNames: String*): RDD[Employee] =
-    sqlc
-      .sql(s"SELECT * FROM employees WHERE lastName IN(${lastNames.mkString("'", "', '", "'")})")
-      .map(toEmployee)
+  /*
+   * SELECT DISTINCT lastName FROM employees
+   */
 
-  def byLastNameLike(lastName: String): RDD[Employee] =
-    sqlc
-      .sql(s"SELECT * FROM employees WHERE lastName LIKE '$lastName%'")
-      .map(toEmployee)
+  def distinctLastNames(): Dataset[String] =
+    lastNames().distinct()
 
-  def withDepartment(): RDD[(String, String, String, String, Int)] = {
-    val sql =
-      """
-        |SELECT ssn, e.name AS name_e, lastName, d.name AS name_d, budget
-        | FROM employees e INNER JOIN departments d
-        | ON e.department = d.code
-      """.stripMargin
+  /*
+   * SELECT * FROM employees WHERE lastName IN('a', 'a')
+   */
 
-    sqlc
-      .sql(sql)
-      .map(row => (row.getString(0), row.getString(1), row.getString(2), row.getString(3), row.getInt(4)))
+  def byLastName(lastNames: String*): Dataset[Employee] =
+    employees.filter(employee => lastNames.contains(employee.lastName))
+
+  /*
+   * SELECT * FROM employees WHERE lastName LIKE 'foo%'
+   */
+
+  def byLastNameLike(lastName: String): Dataset[Employee] =
+    employees.filter(employee => employee.lastName.startsWith(lastName))
+
+  /*
+   * SELECT ssn, e.name AS name_e, lastName, d.name AS name_d, budget
+   *  FROM employees e INNER JOIN departments d
+   *  ON e.department = d.code
+   */
+
+  def withDepartment(): Dataset[(String, String, String, String, Long)] = {
+    employees
+      .joinWith(departments, employees("department") === departments("code"), "inner")
+      .map {
+        case (employee, department) =>
+          (employee.ssn, employee.name, employee.lastName, department.name, department.budget)
+      }
   }
 }
 
-object EmployeeDao {
-  private def toEmployee(row: Row): Employee =
-    Employee(row.getString(0), row.getString(1), row.getString(2), row.getInt(3))
-}

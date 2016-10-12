@@ -33,10 +33,6 @@ trait SparkStreamingSpec extends SparkSpec {
     _ssc.checkpoint(checkpointDir)
   }
 
-  def batchDuration: Duration = Seconds(1)
-
-  def checkpointDir: String = Files.createTempDirectory(this.getClass.getSimpleName).toUri.toString
-
   override def afterAll(): Unit = {
     if (_ssc != null) {
       _ssc.stop(stopSparkContext = false, stopGracefully = false)
@@ -49,6 +45,10 @@ trait SparkStreamingSpec extends SparkSpec {
   override def sparkConfig: Map[String, String] = {
     super.sparkConfig + ("spark.streaming.clock" -> "org.apache.spark.streaming.util.ManualClock")
   }
+
+  def batchDuration: Duration = Seconds(1)
+
+  def checkpointDir: String = Files.createTempDirectory(this.getClass.getSimpleName).toUri.toString
 
   def ssc: StreamingContext = _ssc
 

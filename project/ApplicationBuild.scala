@@ -20,7 +20,7 @@ import sbt._
 object ApplicationBuild extends Build {
 
   object Versions {
-    val spark = "1.6.1"
+    val spark = "2.0.1"
   }
 
   val projectName = "example-spark"
@@ -28,7 +28,7 @@ object ApplicationBuild extends Build {
   val common = Seq(
     version := "1.0",
     organization := "http://mkuthan.github.io/",
-    scalaVersion := "2.11.7"
+    scalaVersion := "2.11.8"
   )
 
   val customScalacOptions = Seq(
@@ -57,20 +57,16 @@ object ApplicationBuild extends Build {
   )
 
   val customLibraryDependencies = Seq(
-    "org.apache.spark" %% "spark-core" % Versions.spark % "provided",
-    "org.apache.spark" %% "spark-sql" % Versions.spark % "provided",
-    "org.apache.spark" %% "spark-hive" % Versions.spark % "provided",
-    "org.apache.spark" %% "spark-streaming" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-core" % Versions.spark,// % "provided",
+    "org.apache.spark" %% "spark-sql" % Versions.spark,// % "provided",
+    "org.apache.spark" %% "spark-hive" % Versions.spark,// % "provided",
+    "org.apache.spark" %% "spark-streaming" % Versions.spark,// % "provided",
 
-    "org.apache.spark" %% "spark-streaming-kafka" % Versions.spark
-      exclude("log4j", "log4j")
-      exclude("org.spark-project.spark", "unused"),
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
 
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "org.slf4j" % "slf4j-api" % "1.7.21",
 
-    "org.slf4j" % "slf4j-api" % "1.7.10",
-
-    "org.slf4j" % "slf4j-log4j12" % "1.7.10"
+    "org.slf4j" % "slf4j-log4j12" % "1.7.21"
       exclude("log4j", "log4j"),
 
     "log4j" % "log4j" % "1.2.17" % "provided",
@@ -99,5 +95,7 @@ object ApplicationBuild extends Build {
     // enable scalastyle checks during tests compilation
     .settings(testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value)
     .settings(test in Test <<= (test in Test) dependsOn testScalastyle)
+    // do not execute tests during assembly
+    .settings(test in sbtassembly.AssemblyKeys.assembly := {})
 }
 

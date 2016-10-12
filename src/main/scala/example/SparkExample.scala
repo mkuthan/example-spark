@@ -17,7 +17,8 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 
 object SparkExample extends LazyLogging {
 
@@ -31,12 +32,16 @@ object SparkExample extends LazyLogging {
       .setMaster(master)
       .setAppName(appName)
 
-    val sc = new SparkContext(conf)
+    val spark = SparkSession.builder()
+      .config(conf)
+      .getOrCreate()
 
-    val lines = sc.textFile("src/main/resources/data/words.txt")
-    val wordsCount = WordCount.count(sc, lines, stopWords)
+    val lines = spark.sparkContext.textFile("src/main/resources/data/words.txt")
+    val wordsCount = WordCount.count(spark.sparkContext, lines, stopWords)
 
     val counts = wordsCount.collect().mkString("[", ", ", "]")
     logger.info(counts)
+
+    spark.stop()
   }
 }

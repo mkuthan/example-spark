@@ -17,8 +17,8 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 /** Based on http://en.wikibooks.org/wiki/SQL_Exercises/Employee_management. */
 object SparkSqlExample extends LazyLogging {
@@ -32,25 +32,13 @@ object SparkSqlExample extends LazyLogging {
       .setMaster(master)
       .setAppName(appName)
 
-    val sc = new SparkContext(conf)
-    val sqlc = new HiveContext(sc)
+    val spark = SparkSession.builder.config(conf).enableHiveSupport().getOrCreate()
 
-    val employeeDao = new EmployeeDao(sqlc)
-    val departmentDao = new DepartmentDao(sqlc)
+    val employees = loadEmployees(spark)
+    val departments = loadDepartments(spark)
 
-    import sqlc.implicits._
-
-    val employees = sc.textFile("src/main/resources/data/employees.txt")
-      .map(_.split(","))
-      .map(fields => Employee(fields(0), fields(1), fields(2), fields(3).trim.toInt))
-      .toDF()
-    employees.registerTempTable("employees")
-
-    val departments = sc.textFile("src/main/resources/data/departments.txt")
-      .map(_.split(","))
-      .map(fields => Department(fields(0).trim.toInt, fields(1), fields(2).trim.toInt))
-      .toDF()
-    departments.registerTempTable("departments")
+    val employeeDao = new EmployeeDao(spark, employees, departments)
+    val departmentDao = new DepartmentDao(spark, departments, employees)
 
     logger.info("Select the last name of all employees")
     employeeDao.lastNames().collect().foreach(logger.info(_))
@@ -79,4 +67,26 @@ object SparkSqlExample extends LazyLogging {
 
   }
 
+  private def loadDepartments(spark: SparkSession): Dataset[Department] = {
+    import org.apache.spark.sql.types._
+    import spark.implicits._
+    spark.read
+      .schema(StructType(Seq(
+        StructField("code", IntegerType),
+        StructField("name", StringType),
+        StructField("budget", LongType))))
+      .csv("src/main/resources/data/departments.txt").as[Department]
+  }
+
+  private def loadEmployees(spark: SparkSession): Dataset[Employee] = {
+    import org.apache.spark.sql.types._
+    import spark.implicits._
+    spark.read
+      .schema(StructType(Seq(
+        StructField("ssn", StringType),
+        StructField("name", StringType),
+        StructField("lastName", StringType),
+        StructField("department", IntegerType))))
+      .csv("src/main/resources/data/employees.txt").as[Employee]
+  }
 }

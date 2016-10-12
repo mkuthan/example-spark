@@ -16,4 +16,4 @@
 
 package example
 
-case class Department(code: Int, name: String, budget: Int)
+case class Department(code: Int, name: String, budget: Long)

@@ -16,12 +16,12 @@
 
 package example
 
-import org.mkuthan.spark.SparkSqlSpec
+import org.mkuthan.spark.SparkSpec
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
-class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen with Matchers {
+class SparkSqlExampleSpec extends FlatSpec with SparkSpec with GivenWhenThen with Matchers {
 
-  private val employees = Array(
+  private val employees = Seq(
     Employee("123234877", "Michael", "Rogers", 14),
     Employee("152934485", "Anand", "Manikutty", 14),
     Employee("222364883", "Carol", "Smith", 37),
@@ -35,7 +35,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
     Employee("845657245", "Elizabeth", "Doe", 14),
     Employee("845657246", "Kumar", "Swamy", 14)
   )
-  private val departments = Array(
+  private val departments = Seq(
     Department(14, "IT", 65000),
     Department(37, "Accounting", 15000),
     Department(59, "Human Resources", 240000),
@@ -47,15 +47,14 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   override def beforeAll(): Unit = {
     super.beforeAll()
 
-    val _sqlc = sqlc
+    val _spark = spark
+    import _spark.implicits._
 
-    import _sqlc.implicits._
+    val employeesDs = employees.toDS()
+    val departmentsDs = departments.toDS()
 
-    sc.parallelize(employees).toDF().registerTempTable("employees")
-    sc.parallelize(departments).toDF().registerTempTable("departments")
-
-    employeeDao = new EmployeeDao(sqlc)
-    departmentDao = new DepartmentDao(sqlc)
+    employeeDao = new EmployeeDao(spark, employeesDs, departmentsDs)
+    departmentDao = new DepartmentDao(spark, departmentsDs, employeesDs)
   }
 
   "The last name of all employees" should "be selected" in {
@@ -82,7 +81,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   "The employees whose last name is 'Smith' or 'Doe'" should "be selected" in {
     val smithsOrDoes = employeeDao.byLastName("Smith", "Doe").collect()
 
-    smithsOrDoes should equal(Array(
+    smithsOrDoes should equal(Seq(
       Employee("222364883", "Carol", "Smith", 37),
       Employee("546523478", "John", "Doe", 59),
       Employee("631231482", "David", "Smith", 77),
@@ -93,7 +92,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   "The employees whose last name name begins with an 'S'" should "be selected" in {
     val smithsOrDoes = employeeDao.byLastNameLike("S").collect()
 
-    smithsOrDoes should equal(Array(
+    smithsOrDoes should equal(Seq(
       Employee("222364883", "Carol", "Smith", 37),
       Employee("326587417", "Joe", "Stevens", 37),
       Employee("631231482", "David", "Smith", 77),
@@ -110,7 +109,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   "The number of all the employees in each department " should "be calculated" in {
     val numberOfEmployees = departmentDao.numberOfEmployees().collect()
 
-    numberOfEmployees should equal(Array(
+    numberOfEmployees should equal(Seq(
       (37, 2),
       (59, 3),
       (77, 2),
@@ -121,7 +120,7 @@ class SparkSqlExampleSpec extends FlatSpec with SparkSqlSpec with GivenWhenThen 
   "All employees including each employee's department's data" should "be selected" in {
     val employeesWithDepartment = employeeDao.withDepartment().collect()
 
-    employeesWithDepartment should equal(Array(
+    employeesWithDepartment should equal(Seq(
       ("222364883", "Carol", "Smith", "Accounting", 15000),
       ("326587417", "Joe", "Stevens", "Accounting", 15000),
       ("546523478", "John", "Doe", "Human Resources", 240000),
